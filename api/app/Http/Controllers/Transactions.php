@@ -8,8 +8,13 @@ use Illuminate\Http\Request;
 
 class Transactions extends Controller{
 
+    protected $INSUFFICIENT_BALANCE = -1;
+    protected $INVALID_ACCOUNT = -2;
+
     /**
-     * List an account's transactions    
+     * List an account's transactions
+     *
+     * $id: id of the account related to the transactions
      */
 
     public function list($id){
@@ -25,36 +30,53 @@ class Transactions extends Controller{
 
     /**
      * Send money to an account
+     *
+     * $request: POST request details of the transaction
+     * $id: id of the account sending the money
      */
 
     public function send(Request $request, $id){
 
-        $status['status'] = false;
-
+        $response['status'] = false;
+        
         $to = $request->input('to');
-        $amount = $request->input('amount');
+        $amount = floatval($request->input('amount'));
         $details = $request->input('details');
 
-        // Validate the sent amount
-        //$this->validateAmount($id, $amount);
+        if(
+           $id !== $to // Verify if the source account is not the destination account
+           && $this->accountExists($id) // Verify if the sender account exists
+           && $this->accountExists($to) // Verify if the receiver account exists
+           ){
 
-        $sender = $this->updateBalance($id, $amount, 'debit');
-        $sender = $this->updateBalance($to, $amount, 'credit');
+            // Validate the sent amount
+            if($this->sufficientBalance($id, $amount)){
 
+                $debitStatus = $this->updateBalance($id, $amount, 'debit');
+                $creditStatus = $this->updateBalance($to, $amount, 'credit');
 
-        DB::table('transactions')->insert(
-            [
-                'from' => $id,
-                'to' => $to,
-                'amount' => $amount,
-                'details' => $details
-            ]
-        );
+                // Record successful transaction
+                $this->recordTransaction($id, $to, $amount, $details);
 
+                $response['status'] = true;
+                $response['remainingBalance'] = $this->getBalance($id);
+
+            }
+            else{
+                $response['error'] = $this->INSUFFICIENT_BALANCE;
+            }
+        }
+        else{
+            $response['error'] = $this->INVALID_ACCOUNT;
+        }
+
+        return $response;
     }
 
     /**
      * Retrieve an account's balance
+     *
+     * $id: id of the account
      */
 
     private function getBalance($id){
@@ -70,6 +92,10 @@ class Transactions extends Controller{
 
     /**
      * Update an account's balance
+     *
+     * $id: id of the account to be updated
+     * $amount: amount credited or debited to an account
+     * $operator: credit or debit to an account
      */
 
     private function updateBalance($id, $amount, $operator){
@@ -88,19 +114,54 @@ class Transactions extends Controller{
     /**
      * Verify if the amount sent is less than or equal to 
      * the remaining remaining balance in the users account
+     *
+     * $id: id of the account
+     * $amount: amount to be debited from the account
      */
 
-    private function validateAmount($id, $amount){
+    private function sufficientBalance($id, $amount){
         
-        $balance = $this->getBalance($id);
+        $balance = floatval($this->getBalance($id));
 
-        return $amount <= $balance;
+        return ($amount <= $balance);
 
     }
 
-
     /**
+     * Verify if the receiving account exists
      *
+     * $id: id of the account
      */
 
+    private function accountExists($id){
+        
+        $account = DB::table('accounts')
+                 ->where('id', $id)
+                 ->get();
+
+        return $account->count() > 0;
+
+    }
+
+    /**
+     * Record a transaction made with an account
+     *
+     *  $id: sender of the money
+     *  $to: receiver of the money
+     *  $amount: sent amount
+     *  $details: transaction details
+     */
+
+    private function recordTransaction($id, $to, $amount, $details){
+
+        DB::table('transactions')->insert(
+            [
+                'from' => $id,
+                'to' => $to,
+                'amount' => $amount,
+                'details' => $details
+            ]
+        );
+
+    }
 }
