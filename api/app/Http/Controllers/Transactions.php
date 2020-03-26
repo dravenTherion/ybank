@@ -15,7 +15,8 @@ class Transactions extends Controller{
     public function list($id){
 
         $account = DB::table('transactions')
-             ->whereRaw("`from`=$id OR `to`=$id")
+             ->where('from',$id)
+             ->orWhere('to',$id)
              ->get();
 
         return $account;
@@ -28,17 +29,18 @@ class Transactions extends Controller{
 
     public function send(Request $request, $id){
 
+        $status['status'] = false;
+
         $to = $request->input('to');
         $amount = $request->input('amount');
         $details = $request->input('details');
 
-        $account = DB::table('accounts')
-                 ->whereRaw("id=$id")
-                 ->update(['balance' => DB::raw('balance-' . $amount)]);
+        // Validate the sent amount
+        //$this->validateAmount($id, $amount);
 
-        $account = DB::table('accounts')
-                 ->whereRaw("id=$to")
-                 ->update(['balance' => DB::raw('balance+' . $amount)]);
+        $sender = $this->updateBalance($id, $amount, 'debit');
+        $sender = $this->updateBalance($to, $amount, 'credit');
+
 
         DB::table('transactions')->insert(
             [
@@ -50,4 +52,55 @@ class Transactions extends Controller{
         );
 
     }
+
+    /**
+     * Retrieve an account's balance
+     */
+
+    private function getBalance($id){
+
+        $balance = DB::table('accounts')
+                 ->select('balance')
+                 ->where('id', $id)
+                 ->get()[0];
+
+        return $balance->balance;
+
+    }
+
+    /**
+     * Update an account's balance
+     */
+
+    private function updateBalance($id, $amount, $operator){
+
+        $balance = $this->getBalance($id);
+        $newAmount = $operator === 'credit' ? $balance + $amount : $balance - $amount;
+
+        $account = DB::table('accounts')
+                 ->where('id', $id)
+                 ->update(['balance' => $newAmount]);
+
+        return $account;
+
+    }
+
+    /**
+     * Verify if the amount sent is less than or equal to 
+     * the remaining remaining balance in the users account
+     */
+
+    private function validateAmount($id, $amount){
+        
+        $balance = $this->getBalance($id);
+
+        return $amount <= $balance;
+
+    }
+
+
+    /**
+     *
+     */
+
 }
