@@ -89,17 +89,21 @@ import Vue from "vue";
   },
 
   mounted() {
-
     const that = this;
 
     that.retrieveAccountData();
     that.retrieveTransactionData();
-
   },
 
   methods: {
 
+    /**
+     * Process the transaction when the submit is pressed
+     * 
+     * @param evt
+     */
     onSubmit(evt) {
+
       const that = this;
 
       evt.preventDefault();
@@ -117,9 +121,9 @@ import Vue from "vue";
         // if the transaction has errors
         if (data.error) {
 
-          // if the receiving account number is invalid, display...
+          // if the receiving ID is invalid, display...
           if (data.error === -2) {
-            that.error = 'Invalid receiving account number';
+            that.error = 'Invalid recipient ID';
           }
           // else if the account has insuficient funds, display...
           else if (data.error === -1)
@@ -167,7 +171,6 @@ import Vue from "vue";
      * Retrieve and update the Transactions list
      *
      */
-
     retrieveTransactionData() {
 
       const that = this;
