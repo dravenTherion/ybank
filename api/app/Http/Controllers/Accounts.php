@@ -9,7 +9,9 @@ use Illuminate\Http\Request;
 class Accounts extends Controller{
 
     /**
-     * get user account based on id    
+     * get user account based on id
+
+        $id: account id
      */
 
     public function get($id){
