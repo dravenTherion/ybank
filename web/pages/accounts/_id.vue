@@ -3,28 +3,8 @@
     <div class="container" v-if="loading">loading...</div>
 
     <div class="container" v-if="!loading">
-      <b-card :header="'Welcome, ' + account.name" class="mt-3">
-        <b-card-text>
-          <div>
-            Account: <code>{{ account.id }}</code>
-          </div>
-          <div>
-            Balance:
-            <code>
-              {{
- account.currency === "usd" ? "$" : "€"
-              }}{{ account.balance }}
-            </code>
-          </div>
-        </b-card-text>
-        <b-button size="sm" variant="success" @click="showPaymentForm = !showPaymentForm">New payment</b-button>
 
-        <b-button class="float-right"
-                  variant="danger"
-                  size="sm"
-                  nuxt-link
-                  to="/">Logout</b-button>
-      </b-card>
+      <account-card :account="{ id: account.id, name: account.name, balance: account.balance }" v-on:toggle-payment="showPaymentForm = !showPaymentForm"></account-card>
 
       <b-card class="mt-3" header="New Payment" v-show="showPaymentForm">
         <b-form @submit="onSubmit">
@@ -69,8 +49,11 @@
 </template>
 
 <script lang="ts">
-import axios from "axios";
-import Vue from "vue";
+
+  import axios from "axios";
+  import Vue from "vue";
+
+  import AccountCard from './components/account_card.vue';
 
   export default {
 
@@ -87,6 +70,10 @@ import Vue from "vue";
       error: ''
     };
   },
+
+    components: {
+      'account-card': AccountCard
+    },
 
   mounted() {
     const that = this;
@@ -114,6 +101,7 @@ import Vue from "vue";
         }/transactions`,
 
         this.payment
+
       ).then(function (response) {
 
         const data = response.data;
@@ -134,6 +122,7 @@ import Vue from "vue";
 
           that.payment = {};
           that.showPaymentForm = false;
+          that.error = '';
 
           that.retrieveAccountData();
           that.retrieveTransactionData();
