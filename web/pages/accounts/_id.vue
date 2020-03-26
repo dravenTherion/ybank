@@ -41,9 +41,8 @@
         </b-form>
       </b-card>
 
-      <b-card class="mt-3" header="Payment History">
-        <b-table striped hover :items="transactions"></b-table>
-      </b-card>
+      <payment-history-card :transactions="{ items: transactions }"></payment-history-card>
+
     </div>
   </div>
 </template>
@@ -54,6 +53,7 @@
   import Vue from "vue";
 
   import AccountCard from './components/account_card.vue';
+  import PaymentHistoryCard from './components/payment_history_card.vue';
 
   export default {
 
@@ -72,7 +72,8 @@
   },
 
     components: {
-      'account-card': AccountCard
+      'account-card': AccountCard,
+      'payment-history-card': PaymentHistoryCard
     },
 
   mounted() {
