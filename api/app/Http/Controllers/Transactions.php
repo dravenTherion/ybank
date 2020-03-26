@@ -59,7 +59,6 @@ class Transactions extends Controller{
                 $this->recordTransaction($id, $to, $amount, $details);
 
                 $response['status'] = true;
-                $response['remainingBalance'] = $this->getBalance($id);
 
             }
             else{
