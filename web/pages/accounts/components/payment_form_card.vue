@@ -94,7 +94,7 @@
 
             // else if the account has insuficient funds
             else if (data.error === -1)
-              that.error = 'Insufficient funds in account.';
+              that.error = 'The amount you\'re trying to send exceeds the funds in your account.';
 
             // else if the amount sent is zero or less
             else if (data.error === -3)
