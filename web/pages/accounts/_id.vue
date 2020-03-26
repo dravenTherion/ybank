@@ -151,16 +151,3 @@
   }
 };
 </script>
-
-<!-- Additional Styles -->
-<style scoped>
-
-  .warning{
-
-    display: inline-block;
-    margin-left: 10px;
-    color: red;
-
-  }
-
-</style>
