@@ -65,13 +65,13 @@
       /**
        * Process the transaction when the submit button is pressed
        *
-       * @param evt
+       * @param event
        */
-      onSubmit(evt) {
+      onSubmit(event) {
 
         const that = this;
 
-        evt.preventDefault();
+        event.preventDefault();
 
         axios.post(
           `http://localhost:8000/api/accounts/${
@@ -87,13 +87,19 @@
           // if the transaction has errors
           if (data.error) {
 
-            // if the receiving ID is invalid, display...
+            // if the receiving ID is invalid
             if (data.error === -2) {
-              that.error = 'Invalid recipient ID';
+              that.error = 'Invalid recipient ID.';
             }
-            // else if the account has insuficient funds, display...
+
+            // else if the account has insuficient funds
             else if (data.error === -1)
-              that.error = 'Insufficient funds in account';
+              that.error = 'Insufficient funds in account.';
+
+            // else if the amount sent is zero or less
+            else if (data.error === -3)
+              that.error = 'Invalid amount. The amount should be greater than 0.';
+
           }
           // if the transaction is successful
           else {

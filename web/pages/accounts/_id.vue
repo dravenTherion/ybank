@@ -4,9 +4,9 @@
 
     <div class="container" v-if="!loading">
 
-      <account-card :account="{ id: account.id, name: account.name, balance: account.balance }" v-on:toggle-payment="showPaymentForm = !showPaymentForm"></account-card>
+      <account-card :account="{ id: account.id, name: account.name, balance: account.balance }" @toggle-payment="showPaymentForm = !showPaymentForm"></account-card>
 
-      <payment-form-card v-show="showPaymentForm" v-on:payment-success="onPaymentSuccess"></payment-form-card>
+      <payment-form-card v-show="showPaymentForm" @payment-success="onPaymentSuccess"></payment-form-card>
 
       <payment-history-card :transactions="{ items: transactions }"></payment-history-card>
 

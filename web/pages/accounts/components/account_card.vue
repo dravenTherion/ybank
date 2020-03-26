@@ -9,7 +9,7 @@
         Balance:
         <code>
           {{
- account.currency === "usd" ? "$" : "€"
+            account.currency === "usd" ? "$" : "€"
           }}{{ account.balance }}
         </code>
       </div>

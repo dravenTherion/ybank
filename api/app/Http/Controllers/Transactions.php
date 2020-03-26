@@ -10,6 +10,7 @@ class Transactions extends Controller{
 
     protected $INSUFFICIENT_BALANCE = -1;
     protected $INVALID_ACCOUNT = -2;
+    protected $INVALID_AMOUNT = -3;
 
     /**
      * List an account's transactions
@@ -49,8 +50,12 @@ class Transactions extends Controller{
            && $this->accountExists($to) // Verify if the receiver account exists
            ){
 
-            // Validate the sent amount
-            if($this->sufficientBalance($id, $amount)){
+            // Check if the amount is valid
+            if($amount <= 0)
+                $response['error'] = $this->INVALID_AMOUNT;
+
+            // Check if the amount sent is within the remaining balance
+            else if($this->sufficientBalance($id, $amount)){
 
                 $debitStatus = $this->updateBalance($id, $amount, 'debit');
                 $creditStatus = $this->updateBalance($to, $amount, 'credit');
