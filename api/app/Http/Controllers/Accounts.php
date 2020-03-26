@@ -15,7 +15,7 @@ class Accounts extends Controller{
     public function get($id){
 
         $account = DB::table('accounts')
-             ->whereRaw("id=$id")
+             ->where('id', $id)
              ->get();
 
         return $account;
